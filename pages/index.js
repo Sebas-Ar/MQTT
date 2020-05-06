@@ -1,88 +1,110 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
-import Nav from '../components/nav'
 
-const Home = () => (
-  <div>
+const Home = () => {
+
+  const [top, setTop] = useState('');
+
+
+  useEffect(() => {
+    var hostname = "tailor.cloudmqtt.com";
+    var port = 30432;
+    var clientId = "webio4mqttexample";
+    clientId += new Date().getUTCMilliseconds();;
+    var username = "giptqpdu";
+    var password = "1axnvdwpNP-d";
+    var subscription = "output";
+    var displayClass;
+
+    var mqttClient = new Paho.MQTT.Client(hostname, port, clientId);
+    mqttClient.onMessageArrived = MessageArrived;
+    mqttClient.onConnectionLost = ConnectionLost;
+    Connect();
+
+    /*Initiates a connection to the MQTT broker*/
+    function Connect() {
+      mqttClient.connect({
+        onSuccess: Connected,
+        onFailure: ConnectionFailed,
+        keepAliveInterval: 10,
+        userName: username,
+        useSSL: true,
+        password: password
+      });
+    }
+
+    /*Callback for successful MQTT connection */
+    function Connected() {
+      console.log("Connected");
+      mqttClient.subscribe(subscription);
+    }
+
+    /*Callback for failed connection*/
+    function ConnectionFailed(res) {
+      console.log("Connect failed:" + res.errorMessage);
+    }
+
+    /*Callback for lost connection*/
+    function ConnectionLost(res) {
+      if (res.errorCode !== 0) {
+        console.log("Connection lost:" + res.errorMessage);
+        Connect();
+      }
+    }
+
+
+    /*Callback for incoming message processing */
+    function MessageArrived(message) {
+      setTop(message.destinationName + " : " + message.payloadString);
+      switch (message.payloadString) {
+        case "ON":
+          displayClass = "on";
+          break;
+        case "OFF":
+          displayClass = "off";
+          break;
+        default:
+          displayClass = "unknown";
+      }
+      var topic = message.destinationName.split("/");
+      if (topic.length == 3) {
+        var ioname = topic[1];
+        UpdateElement(ioname, displayClass);
+      }
+    }
+  }, []);
+
+  return <div className="content">
     <Head>
-      <title>Home</title>
+      <title>{top}</title>
       <link rel="icon" href="/favicon.ico" />
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"> </script>
     </Head>
 
-    <Nav />
-
-    <div className="hero">
-      <h1 className="title">Welcome to Next.js!</h1>
-      <p className="description">
-        To get started, edit <code>pages/index.js</code> and save to reload.
-      </p>
-
-      <div className="row">
-        <a href="https://nextjs.org/docs" className="card">
-          <h3>Documentation &rarr;</h3>
-          <p>Learn more about Next.js in the documentation.</p>
-        </a>
-        <a href="https://nextjs.org/learn" className="card">
-          <h3>Next.js Learn &rarr;</h3>
-          <p>Learn about Next.js by following an interactive tutorial!</p>
-        </a>
-        <a
-          href="https://github.com/zeit/next.js/tree/master/examples"
-          className="card"
-        >
-          <h3>Examples &rarr;</h3>
-          <p>Find other example boilerplates on the Next.js GitHub.</p>
-        </a>
-      </div>
-    </div>
+    <h1>{top}</h1>
 
     <style jsx>{`
-      .hero {
+
+      :global(*) {
+        margin: 0;
+        padding: 0;
+      }
+
+      .content {
+        height: 100vh;
         width: 100%;
-        color: #333;
+        background: linear-gradient(to top, #141e30, #243b55);
+        display: grid; 
+        align-items: center;
+        justify-items: center;
+      }  
+
+      h1 {
+        color: white;
       }
-      .title {
-        margin: 0;
-        width: 100%;
-        padding-top: 80px;
-        line-height: 1.15;
-        font-size: 48px;
-      }
-      .title,
-      .description {
-        text-align: center;
-      }
-      .row {
-        max-width: 880px;
-        margin: 80px auto 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-      .card {
-        padding: 18px 18px 24px;
-        width: 220px;
-        text-align: left;
-        text-decoration: none;
-        color: #434343;
-        border: 1px solid #9b9b9b;
-      }
-      .card:hover {
-        border-color: #067df7;
-      }
-      .card h3 {
-        margin: 0;
-        color: #067df7;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0;
-        padding: 12px 0 0;
-        font-size: 13px;
-        color: #333;
-      }
+      
     `}</style>
   </div>
-)
+}
 
 export default Home
