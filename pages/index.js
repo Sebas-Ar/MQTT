@@ -22,10 +22,8 @@ const Home = () => {
 
     client.on('connect', () => {
       client.subscribe('GPIO', function (err) {
-        if (!err) {
-          client.publish('GPIO', 'Hello mqtt')
-        } else {
-
+        if (err) {
+          console.log('error al conectar al topic')
         }
       })
     })
