@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Line, defaults } from "react-chartjs-2";
+import mqtt from "mqtt";
 import Head from 'next/head'
 
 const Home = () => {
@@ -8,14 +9,40 @@ const Home = () => {
   const [topicos, setTopicos] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [chartData, setChartData] = useState({});
 
+  const options = {
+    connectTimeout: 4000,
+    clientId: 'cliente' + new Date().getUTCMilliseconds(),
+    keepalive: 60,
+    clean: true
+  }
 
   useEffect(() => {
-    var hostname = "tailor.cloudmqtt.com";
-    var port = 38577;
-    var clientId = "webio4mqttexample";
-    clientId += new Date().getUTCMilliseconds();;
-    var username = "test";
-    var password = "test";
+    
+    const client = mqtt.connect('ws://3.17.147.59:8083/mqtt', options)
+
+    client.on('connect', () => {
+      client.subscribe('GPIO', function (err) {
+        if (!err) {
+          client.publish('GPIO', 'Hello mqtt')
+        } else {
+
+        }
+      })
+    })
+
+    client.on('message', function (topic, message) {
+      setTop(message.toString())
+    })
+
+  }, []);
+
+/*   useEffect(() => {
+    var hostname = "3.17.147.59";
+    var port = 8084;
+    var clientId = "mqttjs_66d6f8e622";
+    clientId += new Date().getUTCMilliseconds();
+    var username = "admin";
+    var password = "public";
     var subscription = "GPIO";
     var displayClass;
 
@@ -24,7 +51,6 @@ const Home = () => {
     mqttClient.onConnectionLost = ConnectionLost;
     Connect();
 
-    /*Initiates a connection to the MQTT broker*/
     function Connect() {
       mqttClient.connect({
         onSuccess: Connected,
@@ -36,18 +62,15 @@ const Home = () => {
       });
     }
 
-    /*Callback for successful MQTT connection */
     function Connected() {
       console.log("Connected");
       mqttClient.subscribe(subscription);
     }
 
-    /*Callback for failed connection*/
     function ConnectionFailed(res) {
       console.log("Connect failed:" + res.errorMessage);
     }
 
-    /*Callback for lost connection*/
     function ConnectionLost(res) {
       if (res.errorCode !== 0) {
         console.log("Connection lost:" + res.errorMessage);
@@ -56,11 +79,9 @@ const Home = () => {
     }
 
 
-    /*Callback for incoming message processing */
     function MessageArrived(message) {
-      /* console.log(message) */
 
-      setTop(/* message.destinationName + " : " +  */message.payloadString);
+      setTop(message.payloadString);
       
       var topic = message.destinationName.split("/");
       if (topic.length == 3) {
@@ -68,7 +89,7 @@ const Home = () => {
         UpdateElement(ioname, displayClass);
       }
     }
-  }, []);
+  }, []); */
 
   useEffect(() => {
 
@@ -86,7 +107,6 @@ const Home = () => {
       }
     }
     setTopicos(array)
-    console.log(topicos)
 
     setChartData({
       labels: ['0.5s', '1s', '1.5s', '2s', '2.5s', '3s', '3.5s', '4s', '4.5s', '5s', '5.5s', '6s', '6.5s', '7s', '7.5s', '8s', '8.5s', '9s', '9.5s', '10s'],
