@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { Line, defaults } from "react-chartjs-2";
 import mqtt from "mqtt";
 import Head from 'next/head'
+import axios from "axios";
 
 const Home = () => {
 
   const [top, setTop] = useState('');
   const [topicos, setTopicos] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [chartData, setChartData] = useState({});
+  const [active, setactive] = useState(true);
 
   const options = {
     connectTimeout: 4000,
@@ -107,7 +109,7 @@ const Home = () => {
     setTopicos(array)
 
     setChartData({
-      labels: ['0.5s', '1s', '1.5s', '2s', '2.5s', '3s', '3.5s', '4s', '4.5s', '5s', '5.5s', '6s', '6.5s', '7s', '7.5s', '8s', '8.5s', '9s', '9.5s', '10s'],
+      labels: ['5s', '10s', '15s', '20s', '25s', '30s', '35s', '40s', '45s', '50s', '55s', '60s', '65s', '70s', '75s', '80s', '85s', '90s', '95s', '100s'],
       datasets: [
         {
           label: 'Distancia [cm]',
@@ -122,12 +124,21 @@ const Home = () => {
 
   }, [top]);
 
+  const handleMongo = async () => {
+    setactive(!active)
+    const url = '/api/mqtt'
+    const res = await axios.post(url, { active })
+    console.log(res)
+  }
+
   return <div className="content">
     <Head>
       <title>{top}</title>
       <link rel="icon" href="/favicon.ico" />
       <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"> </script>
     </Head>
+
+    <button onClick={handleMongo}>Activar</button>
 
     <div className="line">
       <Line data={chartData} redraw={true} options={{
@@ -143,6 +154,8 @@ const Home = () => {
         maintainAspectRatio: false
         }}/>
     </div>
+
+    
 
     <style jsx>{`
 
@@ -163,11 +176,23 @@ const Home = () => {
         display: grid; 
         align-items: center;
         justify-items: center;
+
+        grid-template-rows: 100px 1fr;
       }  
 
-      span {
+      button {
+        border: none;
+        padding: 10px 20px;
         color: white;
-        margin: 0 20px;
+        background: rgba(75, 192, 192, 0.6);
+        border-radius: 20px;
+        outline: none;
+        cursor: pointer;
+        transition: background .5s;
+      }
+
+      button:hover {
+        background: rgba(75, 192, 192);
       }
       
     `}</style>
