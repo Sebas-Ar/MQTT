@@ -35,7 +35,7 @@ export default async (req, res) => {
         
         client.connect().then(() => {
             clientMqtt.on('message', function (topic, message) {
-                client.db('mqtt').collection('GPIO', { capped: true, size: 100, max: 10}).insertOne({
+                client.db('mqtt-database').collection('GPIO', { capped: true, size: 100, max: 10}).insertOne({
                     distancia: message.toString()
                 })
             })

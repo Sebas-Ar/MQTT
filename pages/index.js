@@ -4,10 +4,10 @@ import mqtt from "mqtt";
 import Head from 'next/head'
 import axios from "axios";
 
-const Home = () => {
+const Home = (props) => {
 
-  const [top, setTop] = useState('');
-  const [topicos, setTopicos] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const [top, setTop] = useState('nada');
+  const [topicos, setTopicos] = useState(props.data);
   const [chartData, setChartData] = useState({});
   const [active, setactive] = useState(true);
 
@@ -36,62 +36,10 @@ const Home = () => {
 
   }, []);
 
-/*   useEffect(() => {
-    var hostname = "3.17.147.59";
-    var port = 8084;
-    var clientId = "mqttjs_66d6f8e622";
-    clientId += new Date().getUTCMilliseconds();
-    var username = "admin";
-    var password = "public";
-    var subscription = "GPIO";
-    var displayClass;
-
-    var mqttClient = new Paho.MQTT.Client(hostname, port, clientId);
-    mqttClient.onMessageArrived = MessageArrived;
-    mqttClient.onConnectionLost = ConnectionLost;
-    Connect();
-
-    function Connect() {
-      mqttClient.connect({
-        onSuccess: Connected,
-        onFailure: ConnectionFailed,
-        keepAliveInterval: 10,
-        userName: username,
-        useSSL: true,
-        password: password
-      });
-    }
-
-    function Connected() {
-      console.log("Connected");
-      mqttClient.subscribe(subscription);
-    }
-
-    function ConnectionFailed(res) {
-      console.log("Connect failed:" + res.errorMessage);
-    }
-
-    function ConnectionLost(res) {
-      if (res.errorCode !== 0) {
-        console.log("Connection lost:" + res.errorMessage);
-        Connect();
-      }
-    }
-
-
-    function MessageArrived(message) {
-
-      setTop(message.payloadString);
-      
-      var topic = message.destinationName.split("/");
-      if (topic.length == 3) {
-        var ioname = topic[1];
-        UpdateElement(ioname, displayClass);
-      }
-    }
-  }, []); */
 
   useEffect(() => {
+
+    console.log(top)
 
     let array = topicos
 
@@ -99,9 +47,7 @@ const Home = () => {
       if(i !== 0) {
         array[i] = array[i-1]
       } else {
-        if (isNaN(parseFloat(top))) {
-          array[i] = 0
-        } else {
+        if (!isNaN(parseFloat(top))) {
           array[i] = parseFloat(top)
         }
       }
@@ -200,3 +146,19 @@ const Home = () => {
 }
 
 export default Home
+
+export const getServerSideProps = async () => {
+  const url = 'http://localhost:3000/api/sensor'
+  const res = await axios.get(url)
+
+
+  let sensorData = res.data.response.slice(0, 20)
+  let distancia = []
+
+  for (const dat of sensorData) {
+    distancia.push(parseFloat(dat.distancia))
+  }
+
+
+  return { props: { data: distancia } }
+}
