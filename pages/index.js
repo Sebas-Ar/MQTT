@@ -55,7 +55,7 @@ const Home = (props) => {
     setTopicos(array)
 
     setChartData({
-      labels: ['5s', '10s', '15s', '20s', '25s', '30s', '35s', '40s', '45s', '50s', '55s', '60s', '65s', '70s', '75s', '80s', '85s', '90s', '95s', '100s'],
+      labels: ['0s', '1s', '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', '11s', '12s', '13s', '14s', '15s', '16s', '17s', '18s', '19s'],
       datasets: [
         {
           label: 'Distancia [cm]',
