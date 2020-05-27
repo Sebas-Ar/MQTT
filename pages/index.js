@@ -70,6 +70,7 @@ const Home = (props) => {
         }
       ]
     })
+    console.log(array)
 
     defaults.global.animation = false;
 
