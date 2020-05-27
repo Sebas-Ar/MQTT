@@ -19,22 +19,27 @@ const Home = (props) => {
   }
 
   useEffect(() => {
+    /* console.log(active ? 'activo' : 'desactivo') */
+    const client = mqtt.connect('ws://18.191.153.104:8083/mqtt', options)
+
     
-    const client = mqtt.connect('ws://3.17.147.59:8083/mqtt', options)
-
-    client.on('connect', () => {
-      client.subscribe('GPIO', function (err) {
-        if (err) {
-          console.log('error al conectar al topic')
-        }
+      client.on('connect', () => {
+          client.subscribe('GPIO', function (err) {
+            if (err) {
+              console.log('error al conectar al topic')
+            }
+          })
       })
-    })
+  
+      client.on('message', (topic, message) => {
+        setTop(message.toString())
+        /* if (!active) {
+          console.log('intentado desconectar')
+          client.end(true)
+        } */
+      })
 
-    client.on('message', function (topic, message) {
-      setTop(message.toString())
-    })
-
-  }, []);
+  }, [/* active */]);
 
 
   useEffect(() => {

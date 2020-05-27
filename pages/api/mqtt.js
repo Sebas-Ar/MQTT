@@ -20,7 +20,7 @@ export default async (req, res) => {
             clean: true
         }
     
-        const clientMqtt = mqtt.connect('ws://3.17.147.59:8083/mqtt', options)
+        const clientMqtt = mqtt.connect('ws://18.191.153.104:8083/mqtt', options)
     
         clientMqtt.on('connect', () => {
             clientMqtt.subscribe('GPIO', function (err) {
@@ -35,7 +35,7 @@ export default async (req, res) => {
         
         client.connect().then(() => {
             clientMqtt.on('message', function (topic, message) {
-                client.db('mqtt-database').collection('GPIO', { capped: true, size: 100, max: 10}).insertOne({
+                client.db('mqtt').collection('GPIO', { capped: true, size: 100, max: 10}).insertOne({
                     distancia: message.toString()
                 })
             })
